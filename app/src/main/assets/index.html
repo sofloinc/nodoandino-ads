@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nodo Andino</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#07071A;color:#F4F4FA;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;user-select:none}
+#app{height:100vh;display:flex;flex-direction:column}
+#stage{flex:1;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:4vh 4vw;background:#13123A;overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:center;gap:2vw;position:relative;z-index:2}
+#logo{height:7vh;width:auto}
+.chips{display:flex;gap:.8vw;flex-wrap:wrap;justify-content:flex-end}
+.chip{padding:.6vh 1.2vw;border-radius:999px;background:#22205A;font-size:1.8vh;color:#C9C8F0}
+#ad{flex:1;display:flex;align-items:center;gap:4vw;position:relative;z-index:1;transition:opacity .5s}
+#ad.fade{opacity:0}
+.adtext{flex:1;display:flex;flex-direction:column;gap:2.5vh}
+.kicker{font-size:1.9vh;letter-spacing:.12em;text-transform:uppercase}
+.adtitle{margin:0;font-size:9vh;line-height:1.02;font-weight:800;white-space:pre-line}
+.adbody{margin:0;font-size:3vh;line-height:1.4;color:#C9C8F0;max-width:46vw}
+.qr{width:36vh;height:36vh;border-radius:3vh;background:#F4F4FA;color:#07071A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5vh;font-size:2vh;font-weight:600;text-align:center;padding:2vh}
+.qr img{width:26vh;height:26vh;object-fit:contain}
+.media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+#bars{display:flex;gap:.5vw;position:relative;z-index:2}
+.bar{flex:1;height:.6vh;border-radius:1vh;background:#3A3880;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--acc,#E91EF5)}
+#info{height:15vh;display:flex;background:#07071A;border-top:1px solid #2A2860}
+.cell{flex:1;display:flex;align-items:center;gap:1.5vw;padding:0 2.5vw;border-right:1px solid #2A2860}
+.cell:last-child{border-right:none}
+.col{display:flex;flex-direction:column;gap:.3vh;min-width:0}
+.big{font-size:4.4vh;font-weight:800}
+.mid{font-size:2.8vh;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm{font-size:1.8vh;color:#A9A8D6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.avatar{width:7vh;height:7vh;border-radius:50%;background:#22205A;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:2.8vh;color:#00E5FF;flex:none}
+#cfg,#lock{position:fixed;inset:0;background:#07071Aee;display:none;align-items:center;justify-content:center;z-index:10;padding:3vh}
+#cfg.on,#lock.on{display:flex}
+.panel{background:#13123A;border-radius:16px;padding:24px;width:min(720px,100%);max-height:94vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.panel h2{grid-column:1/-1;margin:0 0 4px;font-size:22px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f.full{grid-column:1/-1}
+label{font-size:14px;color:#C9C8F0}
+input,select{min-height:46px;border-radius:10px;border:1px solid #3A3880;background:#07071A;color:#F4F4FA;padding:0 12px;font:inherit;font-size:16px}
+.btns{grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+button{min-height:48px;padding:0 20px;border-radius:10px;border:1px solid #3A3880;background:transparent;color:#F4F4FA;font:inherit;font-weight:600;font-size:16px}
+button.pri{background:#E91EF5;border:none;color:#07071A}
+.note{grid-column:1/-1;font-size:13px;color:#A9A8D6}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div class="top">
+      <img id="logo" src="logo.png" alt="Nodo Andino">
+      <div class="chips" id="chips"></div>
+    </div>
+    <div id="ad"></div>
+    <div id="bars"></div>
+  </div>
+  <div id="info">
+    <div class="cell">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H8a5 5 0 1 1 1-9.9A6 6 0 0 1 20 11a4 4 0 0 1-2.5 8z"/></svg>
+      <div class="col"><span class="big" id="temp">--°C</span><span class="sm" id="wdesc">Cargando clima…</span></div>
+    </div>
+    <div class="cell"><div class="col"><span class="big" id="clock">--:--</span><span class="sm" id="date"></span></div></div>
+    <div class="cell" style="flex:1.3" id="who"></div>
+    <div class="cell"><div class="col"><span class="sm">¿Querés anunciar acá?</span><span class="mid" style="color:#E91EF5">nodoandino.com</span></div></div>
+  </div>
+</div>
+
+<div id="lock"><div class="panel" style="grid-template-columns:1fr;text-align:center">
+  <h2>Licencia inactiva</h2>
+  <p class="sm" style="white-space:normal">Este dispositivo no está autorizado. Contactá a Nodo Andino.</p>
+  <p class="sm" id="lockid"></p>
+</div></div>
+
+<div id="cfg"><form class="panel" id="cfgform" onsubmit="return false">
+  <h2>Configuración del dispositivo</h2>
+  <div class="f"><label for="c_pin">PIN actual</label><input id="c_pin" type="password" inputmode="numeric"></div>
+  <div class="f"><label for="c_newpin">Nuevo PIN (opcional)</label><input id="c_newpin" type="password" inputmode="numeric"></div>
+  <div class="f"><label for="c_modo">Modo</label><select id="c_modo"><option value="vehiculo">Vehículo</option><option value="local">Local comercial</option></select></div>
+  <div class="f"><label for="c_nombre">Nombre del conductor o local</label><input id="c_nombre"></div>
+  <div class="f"><label for="c_wifi">Wi-Fi para pasajeros/clientes</label><input id="c_wifi"></div>
+  <div class="f"><label for="c_clave">Clave Wi-Fi (solo locales)</label><input id="c_clave"></div>
+  <div class="f"><label for="c_loc">Localidad</label><input id="c_loc"></div>
+  <div class="f"><label for="c_zona">Zona</label><input id="c_zona"></div>
+  <div class="f"><label for="c_lat">Latitud (clima)</label><input id="c_lat" inputmode="decimal"></div>
+  <div class="f"><label for="c_lon">Longitud (clima)</label><input id="c_lon" inputmode="decimal"></div>
+  <div class="f"><label for="c_seg">Segundos por anuncio</label><input id="c_seg" inputmode="numeric"></div>
+  <div class="f"><label for="c_srv">Servidor (vacío = anuncios de demo)</label><input id="c_srv" placeholder="https://nodoandino.com"></div>
+  <p class="note" id="c_info"></p>
+  <div class="btns"><button type="button" id="c_cancel">Cancelar</button><button type="button" class="pri" id="c_save">Guardar</button></div>
+</form></div>
+
+<script>
+// ---------- Configuración ----------
+var DEFAULTS = {pin:'2468', modo:'vehiculo', nombre:'', wifi:'', clave:'', localidad:'Bariloche', zona:'Centro', lat:'-41.1335', lon:'-71.3103', segundos:'15', servidor:''};
+function load(k, d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+var cfg = Object.assign({}, DEFAULTS, load('cfg', {}));
+var bridge = window.NodoAndino || {deviceId:function(){return 'navegador';}, appVersion:function(){return '0.1';}, model:function(){return '';}};
+var DEVICE = bridge.deviceId();
+
+// ---------- Anuncios de demo (reemplazados por el paquete del servidor) ----------
+// Reglas opcionales: dias [0=dom..6=sab], desde/hasta (hora 0-24), clima [frio|sol|lluvia|nublado], localidades, zonas, tipo [vehiculo|local]
+var DEMO = [
+  {id:'demo-1', kicker:'Anuncio de ejemplo', titulo:'Día frío,\nchocolate caliente.', texto:'[NOMBRE DEL COMERCIO] — 20% off mostrando esta pantalla.', qrTexto:'Escaneá y obtené el cupón', acento:'#E91EF5', reglas:{clima:['frio','nublado','lluvia']}},
+  {id:'demo-2', kicker:'Anuncio de ejemplo', titulo:'Navegá el Nahuel Huapi.', texto:'[EXCURSIÓN] — salidas todos los días con sol.', qrTexto:'Reservá tu lugar', acento:'#00E5FF', reglas:{clima:['sol']}},
+  {id:'demo-3', kicker:'Tu marca acá', titulo:'Anunciá en\nesta pantalla.', texto:'Llegá a turistas y vecinos según zona, día y clima. Pagás por tiempo de exposición.', qrTexto:'nodoandino.com', acento:'#7C4DFF', reglas:{}},
+  {id:'demo-4', kicker:'Anuncio de ejemplo', titulo:'After office\nen el centro.', texto:'[BAR] — happy hour de 18 a 21 h.', qrTexto:'Ver la carta', acento:'#E91EF5', reglas:{dias:[4,5,6], desde:16, hasta:23}}
+];
+var paquete = load('paquete', null);
+function anuncios(){ return (paquete && paquete.anuncios && paquete.anuncios.length) ? paquete.anuncios : DEMO; }
+
+// ---------- Clima ----------
+var clima = load('clima', null);
+var CODES = {0:'Despejado',1:'Mayormente despejado',2:'Parcialmente nublado',3:'Nublado',45:'Niebla',48:'Niebla',51:'Llovizna',53:'Llovizna',55:'Llovizna',61:'Lluvia',63:'Lluvia',65:'Lluvia fuerte',71:'Nieve',73:'Nieve',75:'Nieve fuerte',80:'Chaparrones',81:'Chaparrones',82:'Chaparrones fuertes',95:'Tormenta'};
+function categoriaClima(){
+  if(!clima) return null;
+  var c = clima.code;
+  if((c>=51&&c<=67)||(c>=80&&c<=82)||c>=95) return 'lluvia';
+  if(clima.temp < 8) return 'frio';
+  if(c<=1) return 'sol';
+  return 'nublado';
+}
+function cargarClima(){
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(cfg.lat)+'&longitude='+encodeURIComponent(cfg.lon)+'&current=temperature_2m,weather_code&daily=temperature_2m_min,temperature_2m_max&timezone=auto&forecast_days=1';
+  fetch(url).then(function(r){return r.json();}).then(function(j){
+    clima = {temp:Math.round(j.current.temperature_2m), code:j.current.weather_code, min:Math.round(j.daily.temperature_2m_min[0]), max:Math.round(j.daily.temperature_2m_max[0])};
+    save('clima', clima); pintarClima();
+  }).catch(function(){ pintarClima(); });
+}
+function pintarClima(){
+  if(!clima){ document.getElementById('wdesc').textContent='Sin conexión'; return; }
+  document.getElementById('temp').textContent = clima.temp+'°C';
+  document.getElementById('wdesc').textContent = (CODES[clima.code]||'—')+' · mín '+clima.min+'° / máx '+clima.max+'°';
+}
+
+// ---------- Reloj y barra inferior ----------
+var DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+var MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function franja(h){ return h<12?'mañana':(h<20?'tarde':'noche'); }
+function tick(){
+  var d = new Date();
+  document.getElementById('clock').textContent = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('date').textContent = DIAS[d.getDay()]+' '+d.getDate()+' de '+MESES[d.getMonth()];
+  var cat = categoriaClima();
+  var chips = [cfg.localidad+' · '+cfg.zona, DIAS[d.getDay()]+' · '+franja(d.getHours())];
+  if(cat) chips.push({frio:'Frío',sol:'Soleado',lluvia:'Lluvia',nublado:'Nublado'}[cat]);
+  document.getElementById('chips').innerHTML = chips.map(function(c){return '<span class="chip">'+esc(c)+'</span>';}).join('');
+}
+function pintarWho(){
+  var el = document.getElementById('who');
+  var nombre = cfg.nombre || (cfg.modo==='vehiculo' ? 'Conductor' : 'Nuestro local');
+  if(cfg.modo==='vehiculo'){
+    var ini = nombre.split(/\s+/).map(function(p){return p.charAt(0);}).join('').slice(0,2).toUpperCase();
+    el.innerHTML = '<div class="avatar">'+esc(ini)+'</div><div class="col"><span class="sm">Tu conductor</span><span class="mid">'+esc(nombre)+'</span>'+(cfg.wifi?'<span class="sm">Wi-Fi: '+esc(cfg.wifi)+'</span>':'')+'</div>';
+  } else {
+    el.innerHTML = '<div class="col"><span class="sm">Bienvenidos a</span><span class="mid">'+esc(nombre)+'</span>'+(cfg.wifi?'<span class="sm">Wi-Fi: '+esc(cfg.wifi)+(cfg.clave?' · Clave: '+esc(cfg.clave):'')+'</span>':'')+'</div>';
+  }
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+// ---------- Selección y rotación ----------
+function cumple(a, d){
+  var r = a.reglas || {};
+  var h = d.getHours(), cat = categoriaClima();
+  if(r.dias && r.dias.indexOf(d.getDay())<0) return false;
+  if(r.desde!=null && h < r.desde) return false;
+  if(r.hasta!=null && h >= r.hasta) return false;
+  if(r.clima && cat && r.clima.indexOf(cat)<0) return false;
+  if(r.localidades && r.localidades.indexOf(cfg.localidad)<0) return false;
+  if(r.zonas && r.zonas.indexOf(cfg.zona)<0) return false;
+  if(r.tipo && r.tipo!==cfg.modo) return false;
+  return true;
+}
+var lista = [], idx = -1, timer = null, inicio = 0;
+function armarLista(){
+  var d = new Date();
+  lista = anuncios().filter(function(a){ return cumple(a, d); });
+  if(!lista.length) lista = anuncios().filter(function(a){ return !a.reglas || !Object.keys(a.reglas).length; });
+  if(!lista.length) lista = anuncios().slice(0,1);
+}
+function render(a){
+  var html = '';
+  if(a.imagen) html += '<img class="media" src="'+esc(a.imagen)+'" alt="">';
+  if(a.video) html += '<video class="media" src="'+esc(a.video)+'" autoplay muted playsinline loop></video>';
+  if(a.titulo || a.texto){
+    html += '<div class="adtext">'+(a.kicker?'<span class="kicker" style="color:'+esc(a.acento||'#E91EF5')+'">'+esc(a.kicker)+'</span>':'')+
+      (a.titulo?'<h1 class="adtitle">'+esc(a.titulo)+'</h1>':'')+(a.texto?'<p class="adbody">'+esc(a.texto)+'</p>':'')+'</div>';
+  }
+  if(a.qr || a.qrTexto){
+    html += '<div class="qr">'+(a.qr?'<img src="'+esc(a.qr)+'" alt="QR">':'<div style="width:26vh;height:26vh;border:3px dashed #07071A;border-radius:12px;display:flex;align-items:center;justify-content:center">QR</div>')+'<span>'+esc(a.qrTexto||'')+'</span></div>';
+  }
+  return html;
+}
+function siguiente(){
+  registrarExposicion();
+  armarLista();
+  idx = (idx + 1) % lista.length;
+  var a = lista[idx];
+  var ad = document.getElementById('ad');
+  ad.classList.add('fade');
+  setTimeout(function(){ ad.innerHTML = render(a); ad.classList.remove('fade'); }, 400);
+  document.getElementById('stage').style.setProperty('--acc', a.acento || '#E91EF5');
+  var bars = document.getElementById('bars');
+  bars.innerHTML = lista.map(function(_, i){ return '<div class="bar"><i style="width:'+(i<idx?'100%':'0')+'"></i></div>'; }).join('');
+  var seg = Math.max(5, parseInt(a.segundos || cfg.segundos, 10) || 15);
+  var bar = bars.children[idx].firstChild;
+  bar.style.transition = 'none'; bar.style.width = '0';
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.style.transition = 'width '+seg+'s linear'; bar.style.width = '100%'; }); });
+  actual = a; inicio = Date.now();
+  clearTimeout(timer); timer = setTimeout(siguiente, seg*1000);
+}
+
+// ---------- Registro de exposición (base de liquidación) ----------
+var actual = null;
+function registrarExposicion(){
+  if(!actual || !inicio) return;
+  var s = Math.round((Date.now()-inicio)/1000);
+  var log = load('exposicion', {});
+  var dia = new Date().toISOString().slice(0,10);
+  var k = dia+'|'+actual.id;
+  log[k] = (log[k]||0) + s;
+  save('exposicion', log);
+}
+function enviarExposicion(){
+  if(!cfg.servidor) return;
+  var log = load('exposicion', {});
+  if(!Object.keys(log).length) return;
+  fetch(cfg.servidor.replace(/\/$/,'')+'/api/exposicion', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({dispositivo:DEVICE, modo:cfg.modo, nombre:cfg.nombre, localidad:cfg.localidad, zona:cfg.zona, registros:log})})
+    .then(function(r){ if(r.ok) save('exposicion', {}); }).catch(function(){});
+}
+
+// ---------- Servidor: licencia y paquete ----------
+function sincronizar(){
+  if(!cfg.servidor){ document.getElementById('lock').classList.remove('on'); return; }
+  var url = cfg.servidor.replace(/\/$/,'')+'/api/paquete?dispositivo='+encodeURIComponent(DEVICE)+'&version='+encodeURIComponent(paquete&&paquete.version||'');
+  fetch(url).then(function(r){ return r.json(); }).then(function(j){
+    var activa = !j.licencia || j.licencia.activa !== false;
+    document.getElementById('lockid').textContent = 'ID del dispositivo: '+DEVICE;
+    document.getElementById('lock').classList.toggle('on', !activa);
+    if(j.anuncios){ paquete = j; save('paquete', j); }
+  }).catch(function(){ /* sin conexión: sigue con el último paquete guardado */ });
+}
+
+// ---------- Pantalla de configuración (5 toques sobre el logo) ----------
+var toques = 0, toqueT = null;
+document.getElementById('logo').addEventListener('click', function(){
+  toques++; clearTimeout(toqueT); toqueT = setTimeout(function(){ toques = 0; }, 2000);
+  if(toques >= 5){ toques = 0; abrirCfg(); }
+});
+var CAMPOS = {c_modo:'modo', c_nombre:'nombre', c_wifi:'wifi', c_clave:'clave', c_loc:'localidad', c_zona:'zona', c_lat:'lat', c_lon:'lon', c_seg:'segundos', c_srv:'servidor'};
+function abrirCfg(){
+  for(var id in CAMPOS) document.getElementById(id).value = cfg[CAMPOS[id]] || '';
+  document.getElementById('c_pin').value = ''; document.getElementById('c_newpin').value = '';
+  document.getElementById('c_info').textContent = 'ID del dispositivo: '+DEVICE+' · '+bridge.model()+' · versión '+bridge.appVersion();
+  document.getElementById('cfg').classList.add('on');
+}
+document.getElementById('c_cancel').onclick = function(){ document.getElementById('cfg').classList.remove('on'); };
+document.getElementById('c_save').onclick = function(){
+  if(document.getElementById('c_pin').value !== cfg.pin){ document.getElementById('c_info').textContent = 'PIN incorrecto.'; return; }
+  for(var id in CAMPOS) cfg[CAMPOS[id]] = document.getElementById(id).value.trim();
+  var np = document.getElementById('c_newpin').value.trim(); if(np) cfg.pin = np;
+  save('cfg', cfg);
+  document.getElementById('cfg').classList.remove('on');
+  pintarWho(); cargarClima(); sincronizar(); tick(); idx = -1; siguiente();
+};
+
+// ---------- Arranque ----------
+pintarWho(); pintarClima(); tick(); cargarClima(); sincronizar(); siguiente();
+setInterval(tick, 15000);
+setInterval(cargarClima, 15*60*1000);
+setInterval(sincronizar, 10*60*1000);
+setInterval(enviarExposicion, 5*60*1000);
+</script>
+</body>
+</html>
